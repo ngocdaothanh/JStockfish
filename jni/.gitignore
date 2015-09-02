@@ -1,0 +1,4 @@
+build
+target
+src/main/cpp/jstockfish_Uci.h
+.*
