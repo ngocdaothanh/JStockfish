@@ -1065,10 +1065,16 @@ Value Position::see(Move m) const {
 /// or by repetition. It does not detect stalemates.
 
 bool Position::is_draw() const {
+  return is_draw_rule50() || is_draw_repetition();
+}
 
-  if (st->rule50 > 99 && (!checkers() || MoveList<LEGAL>(*this).size()))
-      return true;
 
+bool Position::is_draw_rule50() const {
+  return st->rule50 > 99 && (!checkers() || MoveList<LEGAL>(*this).size());
+}
+
+
+bool Position::is_draw_repetition() const {
   StateInfo* stp = st;
   for (int i = 2, e = std::min(st->rule50, st->pliesFromNull); i <= e; i += 2)
   {

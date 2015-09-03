@@ -89,7 +89,7 @@ bool initJvm(JavaVM *vm) {
   return true;
 }
 
-jint JNI_OnLoad(JavaVM *vm, void* reserved) {
+jint JNI_OnLoad(JavaVM *vm, void*) {
 	if (!initJvm(vm)) return JNI_VERSION_1_6;
 
   UCI::init(Options);
@@ -109,17 +109,17 @@ jint JNI_OnLoad(JavaVM *vm, void* reserved) {
   return JNI_VERSION_1_6;
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_uci(JNIEnv *env, jclass klass) {
-  sync_cout << "id name " << engine_info(true)
-            << "\n"       << Options
-            << "\nuciok"  << sync_endl;
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_uci(JNIEnv *env, jclass) {
+  stringstream uci;
+  uci << "id name " << engine_info(true)
+      << "\n"       << Options
+      << "\nuciok";
+
+  jstring ret = env->NewStringUTF(uci.str().c_str());
+  return ret;
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_isready(JNIEnv *env, jclass klass) {
-  sync_cout << "readyok" << sync_endl;
-}
-
-JNIEXPORT void JNICALL Java_jstockfish_Uci_setoption(JNIEnv *env, jclass klass, jstring name, jstring value) {
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_setoption(JNIEnv *env, jclass, jstring name, jstring value) {
   const char *chars_name = env->GetStringUTFChars(name, NULL);
   string str_name = chars_name;
   env->ReleaseStringUTFChars(name, chars_name);
@@ -128,18 +128,20 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_setoption(JNIEnv *env, jclass klass, 
   string str_value = chars_value;
   env->ReleaseStringUTFChars(value, chars_value);
 
-  if (Options.count(str_name))
+  if (Options.count(str_name)) {
       Options[str_name] = str_value;
-  else
-      sync_cout << "No such option: " << name << sync_endl;
+      return true;
+  } else {
+      return false;
+  }
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_ucinewgame(JNIEnv *env, jclass klass) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_ucinewgame(JNIEnv *, jclass) {
   Search::reset();
   Time.availableNodes = 0;
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_position(JNIEnv *env, jclass klass, jstring position) {
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_position(JNIEnv *env, jclass, jstring position) {
   const char *chars = env->GetStringUTFChars(position, NULL);
   istringstream is(chars);
   env->ReleaseStringUTFChars(position, chars);
@@ -158,22 +160,27 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_position(JNIEnv *env, jclass klass, j
     while (is >> token && token != "moves")
       fen += token + " ";
   else
-    return;
+    return false;
 
   pos->set(fen, Options["UCI_Chess960"], Threads.main());
   SetupStates = Search::StateStackPtr(new std::stack<StateInfo>);
 
   // Parse move list (if any)
-  while (is >> token && (m = UCI::to_move(*pos, token)) != MOVE_NONE)
+  while (is >> token)
   {
+    m = UCI::to_move(*pos, token);
+    if (m == MOVE_NONE) return false;
+
     SetupStates->push(StateInfo());
     pos->do_move(m, SetupStates->top(), pos->gives_check(m, CheckInfo(*pos)));
   }
+
+  return true;
 }
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass klass, jstring options) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass, jstring options) {
   const char *chars = env->GetStringUTFChars(options, NULL);
   istringstream is(chars);
   env->ReleaseStringUTFChars(options, chars);
@@ -201,12 +208,12 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass klass, jstring
   Threads.start_thinking(*pos, limits, SetupStates);
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_stop(JNIEnv *env, jclass klass) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_stop(JNIEnv *, jclass) {
   Search::Signals.stop = true;
   Threads.main()->notify_one();  // Could be sleeping
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_ponderhit(JNIEnv *env, jclass klass) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_ponderhit(JNIEnv *, jclass) {
   if (Search::Signals.stopOnPonderhit) {
     Search::Signals.stop = true;
     Threads.main()->notify_one();  // Could be sleeping
@@ -217,11 +224,11 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_ponderhit(JNIEnv *env, jclass klass) 
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_flip(JNIEnv *env, jclass klass) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_flip(JNIEnv *, jclass) {
   pos->flip();
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_bench(JNIEnv *env, jclass klass, jstring options) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_bench(JNIEnv *env, jclass, jstring options) {
   const char *chars = env->GetStringUTFChars(options, NULL);
   istringstream is(chars);
   env->ReleaseStringUTFChars(options, chars);
@@ -229,17 +236,21 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_bench(JNIEnv *env, jclass klass, jstr
   benchmark(*pos, is);
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_d(JNIEnv *env, jclass klass) {
-  sync_cout << *pos << sync_endl;
-  return NULL;  // FIXME
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_d(JNIEnv *env, jclass) {
+  stringstream ss;
+  ss << *pos;
+  jstring ret = env->NewStringUTF(ss.str().c_str());
+  return ret;
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_eval(JNIEnv *env, jclass klass) {
-  sync_cout << Eval::trace(*pos) << sync_endl;
-  return NULL;  // FIXME
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_eval(JNIEnv *env, jclass) {
+  stringstream ss;
+  ss << Eval::trace(*pos);
+  jstring ret = env->NewStringUTF(ss.str().c_str());
+  return ret;
 }
 
-JNIEXPORT void JNICALL Java_jstockfish_Uci_perft(JNIEnv *env, jclass klass, jint depth) {
+JNIEXPORT void JNICALL Java_jstockfish_Uci_perft(JNIEnv *, jclass, jint depth) {
   stringstream ss;
   ss << Options["Hash"]    << " "
      << Options["Threads"] << " " << depth << " current perft";
@@ -248,7 +259,7 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_perft(JNIEnv *env, jclass klass, jint
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(JNIEnv *env, jclass klass, jstring move) {
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(JNIEnv *env, jclass, jstring move) {
   const char *chars = env->GetStringUTFChars(move, NULL);
   string str = chars;
   env->ReleaseStringUTFChars(move, chars);
@@ -257,8 +268,39 @@ JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(JNIEnv *env, jclass klass
   return pos->pseudo_legal(m);
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen(JNIEnv *env, jclass klass) {
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen(JNIEnv *env, jclass) {
   string fen = pos->fen();
   jstring ret = env->NewStringUTF(fen.c_str());
   return ret;
+}
+
+enum State {
+  ALIVE,
+  WHITE_MATE,       // White mates (white wins)
+  BLACK_MATE,       // Black mates (black wins)
+  WHITE_STALEMATE,  // White is stalemated (white can't move)
+  BLACK_STALEMATE,  // Black is stalemated (black can't move)
+  DRAW_REPETITION,  // Draw by 3-fold repetition
+  DRAW_50           // Draw by 50-move rule
+};
+
+JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate(JNIEnv *, jclass) {
+  Bitboard checkers = pos->checkers();
+  int noLegalMove = MoveList<LEGAL>(*pos).size() == 0;
+
+  if (noLegalMove) {
+    if (checkers) {
+      return (pos->side_to_move() == BLACK)? WHITE_MATE : BLACK_MATE;
+    } else {
+      return (pos->side_to_move() == BLACK)? BLACK_STALEMATE : WHITE_STALEMATE;
+    }
+  }
+
+  // Don't use pos->is_draw_rule50 to avoid checking noLegalMove again,
+  // see the implementation of is_draw_rule50
+  if (pos->rule50_count() > 99 && !checkers) return DRAW_50;
+
+  if (pos->is_draw_repetition()) return DRAW_REPETITION;
+
+  return ALIVE;
 }
