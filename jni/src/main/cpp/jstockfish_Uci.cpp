@@ -13,7 +13,6 @@
 #include "syzygy/tbprobe.h"
 
 #include "jstockfish_Uci.h"
-#include "jstockfish.h"
 
 using namespace std;
 
@@ -31,42 +30,12 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved);
 
 //------------------------------------------------------------------------------
 
-void callOnOutput(string output);
-
-namespace jstockfish {
-
-static Mutex m;
-streambuf *original_cout_buf;
-stringbuf *output_buf;
-
-void io_lock() {
-  m.lock();
-
-  original_cout_buf = cout.rdbuf();
-  output_buf = new stringbuf;
-  cout.rdbuf(output_buf);
-}
-
-void io_unlock() {
-  cout.rdbuf(original_cout_buf);
-  string output = output_buf->str();
-  delete output_buf;
-
-  // This Mutex is not reentrant, need to unlock it first before calling callOnOutput
-  m.unlock();
-
-  callOnOutput(output);
-}
-
-}
-
-//------------------------------------------------------------------------------
-
 static JavaVM* jvm = NULL;
 static jclass uciClass = NULL;
 static jmethodID onOutput = NULL;
 
-void callOnOutput(string output) {
+// Call jstockfish.Uci.onOutput
+void uci_out(string output) {
   // Should another thread need to access the Java VM, it must first call
   // AttachCurrentThread() to attach itself to the VM and obtain a JNI interface pointer
   JNIEnv *env;

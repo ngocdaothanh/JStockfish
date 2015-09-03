@@ -22,9 +22,19 @@ execute_process(
         jstockfish.Uci
 )
 
-# See Stockfish Makefile
+include_directories(${JNI_INCLUDE_DIRS} "../src" "src/main/cpp")
+
+# Exclude misc_sync_cout.cpp because we'll implement uci_out to
+# redirect Stockfish output to Java side
 file(GLOB SOURCES "../src/*.cpp" "../src/syzygy/tbprobe.cpp" "src/main/cpp/*.cpp")
+list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_LIST_DIR}/../src/misc_sync_cout.cpp")
 
 set(CMAKE_CXX_STANDARD 11)
-include_directories(${JNI_INCLUDE_DIRS} "../src" "src/main/cpp")
+
+set(STOCKFISH_FLAGS, "-Wall -Wcast-qual -fno-exceptions -fno-rtti -pedantic -Wextra -Wshadow -DNDEBUG -O3 -mdynamic-no-pic -msse -DUSE_BSFQ -msse3 -mpopcnt -DUSE_POPCNT -flto")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${STOCKFISH_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STOCKFISH_FLAGS}")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${STOCKFISH_FLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${STOCKFISH_FLAGS}")
+
 add_library(jstockfish SHARED ${SOURCES} ${JNI_LIBRARIES})
