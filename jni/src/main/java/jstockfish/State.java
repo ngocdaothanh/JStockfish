@@ -7,6 +7,6 @@ public enum State {
     BLACK_MATE,       // Black mates (black wins)
     WHITE_STALEMATE,  // White is stalemated (white can't move)
     BLACK_STALEMATE,  // Black is stalemated (black can't move)
-    DRAW_REPETITION,  // Draw by 3-fold repetition
-    DRAW_50           // Draw by 50-move rule
+    DRAW_50,          // Draw by 50-move rule
+    DRAW_REPETITION   // Draw by 3-fold repetition
 }
