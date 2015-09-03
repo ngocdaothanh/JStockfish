@@ -322,7 +322,7 @@ void Search::think() {
   if (RootMoves[0].pv.size() > 1 || RootMoves[0].extract_ponder_from_tt(RootPos))
       std::cout << " ponder " << UCI::move(RootMoves[0].pv[1], RootPos.is_chess960());
 
-  std::cout << sync_endl;
+  sync_ss << sync_endl;
 }
 
 

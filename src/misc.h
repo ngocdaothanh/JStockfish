@@ -23,6 +23,7 @@
 #include <cassert>
 #include <chrono>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -54,10 +55,13 @@ private:
 
 
 enum SyncCout { IO_LOCK, IO_UNLOCK };
-std::ostream& operator<<(std::ostream&, SyncCout);
 
-#define sync_cout std::cout << IO_LOCK
-#define sync_endl std::endl << IO_UNLOCK
+extern std::stringstream sync_ss;
+#define sync_cout sync_ss << IO_LOCK
+#define sync_endl IO_UNLOCK
+
+void uci_out(std::string out);
+std::ostream& operator<<(std::ostream&, SyncCout);
 
 
 /// xorshift64star Pseudo-Random Number Generator
