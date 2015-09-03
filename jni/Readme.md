@@ -22,10 +22,10 @@ import jstockfish.Uci._
 // Standard UCI commands
 uci
 isready
-setoption("Threads", "4")
+setoption("Threads", Runtime.getRuntime.availableProcessors.toString)
 
 ucinewgame
-position("startpos")
+position("startpos moves d2d4")
 go("infinite")
 stop
 ponderhit
@@ -39,4 +39,5 @@ perft(16)
 
 // Additional commands added by JStockfish
 islegal("d2d4")
+fen
 ```

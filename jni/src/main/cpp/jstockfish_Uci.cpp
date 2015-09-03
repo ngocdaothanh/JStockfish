@@ -44,10 +44,8 @@ void uci_out(string output) {
     return;
   }
 
-  jbyteArray bytes = env->NewByteArray(output.length());
-  env->SetByteArrayRegion(bytes, 0, output.length(), (jbyte*) output.c_str());
-
-  env->CallStaticVoidMethod(uciClass, onOutput, bytes);
+  jstring js = env->NewStringUTF(output.c_str());
+  env->CallStaticVoidMethod(uciClass, onOutput, js);
   jvm->DetachCurrentThread();
 }
 
@@ -82,7 +80,7 @@ bool initJvm(JavaVM *vm) {
     return false;
   }
 
-  onOutput = env->GetStaticMethodID(uciClass, "onOutput", "([B)V");
+  onOutput = env->GetStaticMethodID(uciClass, "onOutput", "(Ljava/lang/String;)V");
 	if (!onOutput) {
     cout << "[JNI] Could not get method jstockfish.Uci.onOutput" << endl;
     return false;
@@ -257,4 +255,10 @@ JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(JNIEnv *env, jclass klass
 
   Move m = UCI::to_move(*pos, str);
   return pos->pseudo_legal(m);
+}
+
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen(JNIEnv *env, jclass klass) {
+  string fen = pos->fen();
+  jstring ret = env->NewStringUTF(fen.c_str());
+  return ret;
 }

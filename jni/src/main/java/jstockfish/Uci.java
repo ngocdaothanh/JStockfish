@@ -25,13 +25,9 @@ public class Uci
 
     // Additional commands added by JStockfish
     public static native boolean islegal(String move);
+    public static native String fen();
 
-    public static void onOutput(byte[] bytes) {
-        try {
-            String output = new String(bytes, "UTF-8");
-            System.out.println("output: " + output);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+    public static void onOutput(String output) {
+        System.out.println("output: " + output);
     }
 }
