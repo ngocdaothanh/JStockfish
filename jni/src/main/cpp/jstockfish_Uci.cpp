@@ -51,18 +51,19 @@ void uci_out(string output) {
 
 //------------------------------------------------------------------------------
 
+// In Stockfish's benchmark.cpp
 void benchmark(const Position& current, istream& is);
 
 // FEN string of the initial position, normal chess
-const char* StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+static const char* gStartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 // The root position
-Position *pos;
+static Position *gpos;
 
 // Stack to keep track of the position states along the setup moves (from the
 // start position to the position just before the search starts). Needed by
 // 'draw by repetition' detection.
-Search::StateStackPtr SetupStates;
+static Search::StateStackPtr gSetupStates;
 
 bool initJvm(JavaVM *vm) {
   jvm = vm;
@@ -89,6 +90,87 @@ bool initJvm(JavaVM *vm) {
   return true;
 }
 
+bool read_position(
+  JNIEnv *env, jboolean chess960, jstring position,
+  Position& pos, Search::StateStackPtr& setupStates
+) {
+  const char *chars = env->GetStringUTFChars(position, NULL);
+  istringstream is(chars);
+  env->ReleaseStringUTFChars(position, chars);
+
+  Move m;
+  string token, fen;
+
+  is >> token;
+
+  if (token == "startpos")
+  {
+    fen = gStartFEN;
+    is >> token; // Consume "moves" token if any
+  }
+  else if (token == "fen")
+    while (is >> token && token != "moves")
+      fen += token + " ";
+  else
+    return false;
+
+  pos.set(fen, chess960, Threads.main());
+
+  // Parse move list (if any)
+  while (is >> token)
+  {
+    m = UCI::to_move(pos, token);
+    if (m == MOVE_NONE) return false;
+
+    setupStates->push(StateInfo());
+    pos.do_move(m, setupStates->top(), pos.gives_check(m, CheckInfo(pos)));
+  }
+
+  return true;
+}
+
+bool islegal(Position& pos, JNIEnv *env, jstring move) {
+  const char *chars = env->GetStringUTFChars(move, NULL);
+  string str = chars;
+  env->ReleaseStringUTFChars(move, chars);
+
+  Move m = UCI::to_move(pos, str);
+  return pos.pseudo_legal(m);
+}
+
+enum State {
+  ALIVE,
+  WHITE_MATE,       // White mates (white wins)
+  BLACK_MATE,       // Black mates (black wins)
+  WHITE_STALEMATE,  // White is stalemated (white can't move)
+  BLACK_STALEMATE,  // Black is stalemated (black can't move)
+  DRAW_REPETITION,  // Draw by 3-fold repetition
+  DRAW_50           // Draw by 50-move rule
+};
+
+int positionstate(Position& pos) {
+  Bitboard checkers = pos.checkers();
+  int noLegalMove = MoveList<LEGAL>(pos).size() == 0;
+
+  if (noLegalMove) {
+    if (checkers) {
+      return (pos.side_to_move() == BLACK)? WHITE_MATE : BLACK_MATE;
+    } else {
+      return (pos.side_to_move() == BLACK)? BLACK_STALEMATE : WHITE_STALEMATE;
+    }
+  }
+
+  // Don't use Posistion::is_draw_rule50 to avoid checking noLegalMove again,
+  // see the implementation of is_draw_rule50
+  if (pos.rule50_count() > 99 && !checkers) return DRAW_50;
+
+  if (pos.is_draw_repetition()) return DRAW_REPETITION;
+
+  return ALIVE;
+}
+
+//------------------------------------------------------------------------------
+
 jint JNI_OnLoad(JavaVM *vm, void*) {
 	if (!initJvm(vm)) return JNI_VERSION_1_6;
 
@@ -104,7 +186,7 @@ jint JNI_OnLoad(JavaVM *vm, void*) {
   Tablebases::init(Options["SyzygyPath"]);
   TT.resize(Options["Hash"]);
 
-  pos = new Position(StartFEN, false, Threads.main());
+  gpos = new Position(gStartFEN, false, Threads.main());
 
   return JNI_VERSION_1_6;
 }
@@ -142,40 +224,11 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_ucinewgame(JNIEnv *, jclass) {
 }
 
 JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_position(JNIEnv *env, jclass, jstring position) {
-  const char *chars = env->GetStringUTFChars(position, NULL);
-  istringstream is(chars);
-  env->ReleaseStringUTFChars(position, chars);
-
-  Move m;
-  string token, fen;
-
-  is >> token;
-
-  if (token == "startpos")
-  {
-    fen = StartFEN;
-    is >> token; // Consume "moves" token if any
-  }
-  else if (token == "fen")
-    while (is >> token && token != "moves")
-      fen += token + " ";
-  else
-    return false;
-
-  pos->set(fen, Options["UCI_Chess960"], Threads.main());
-  SetupStates = Search::StateStackPtr(new std::stack<StateInfo>);
-
-  // Parse move list (if any)
-  while (is >> token)
-  {
-    m = UCI::to_move(*pos, token);
-    if (m == MOVE_NONE) return false;
-
-    SetupStates->push(StateInfo());
-    pos->do_move(m, SetupStates->top(), pos->gives_check(m, CheckInfo(*pos)));
-  }
-
-  return true;
+  gSetupStates = Search::StateStackPtr(new std::stack<StateInfo>);
+  return read_position(
+    env, Options["UCI_Chess960"], position,
+    *gpos, gSetupStates
+  );
 }
 
 //------------------------------------------------------------------------------
@@ -191,7 +244,7 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass, jstring optio
   while (is >> token)
     if (token == "searchmoves")
       while (is >> token)
-        limits.searchmoves.push_back(UCI::to_move(*pos, token));
+        limits.searchmoves.push_back(UCI::to_move(*gpos, token));
 
     else if (token == "wtime")     is >> limits.time[WHITE];
     else if (token == "btime")     is >> limits.time[BLACK];
@@ -205,7 +258,7 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass, jstring optio
     else if (token == "infinite")  limits.infinite = true;
     else if (token == "ponder")    limits.ponder = true;
 
-  Threads.start_thinking(*pos, limits, SetupStates);
+  Threads.start_thinking(*gpos, limits, gSetupStates);
 }
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_stop(JNIEnv *, jclass) {
@@ -225,7 +278,7 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_ponderhit(JNIEnv *, jclass) {
 //------------------------------------------------------------------------------
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_flip(JNIEnv *, jclass) {
-  pos->flip();
+  gpos->flip();
 }
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_bench(JNIEnv *env, jclass, jstring options) {
@@ -233,19 +286,19 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_bench(JNIEnv *env, jclass, jstring op
   istringstream is(chars);
   env->ReleaseStringUTFChars(options, chars);
 
-  benchmark(*pos, is);
+  benchmark(*gpos, is);
 }
 
 JNIEXPORT jstring JNICALL Java_jstockfish_Uci_d(JNIEnv *env, jclass) {
   stringstream ss;
-  ss << *pos;
+  ss << *gpos;
   jstring ret = env->NewStringUTF(ss.str().c_str());
   return ret;
 }
 
 JNIEXPORT jstring JNICALL Java_jstockfish_Uci_eval(JNIEnv *env, jclass) {
   stringstream ss;
-  ss << Eval::trace(*pos);
+  ss << Eval::trace(*gpos);
   jstring ret = env->NewStringUTF(ss.str().c_str());
   return ret;
 }
@@ -254,53 +307,59 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_perft(JNIEnv *, jclass, jint depth) {
   stringstream ss;
   ss << Options["Hash"]    << " "
      << Options["Threads"] << " " << depth << " current perft";
-  benchmark(*pos, ss);
+  benchmark(*gpos, ss);
 }
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(JNIEnv *env, jclass, jstring move) {
-  const char *chars = env->GetStringUTFChars(move, NULL);
-  string str = chars;
-  env->ReleaseStringUTFChars(move, chars);
-
-  Move m = UCI::to_move(*pos, str);
-  return pos->pseudo_legal(m);
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal__Ljava_lang_String_2(
+  JNIEnv *env, jclass, jstring move
+) {
+  return islegal(*gpos, env, move);
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen(JNIEnv *env, jclass) {
-  string fen = pos->fen();
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen__(JNIEnv *env, jclass) {
+  string fen = gpos->fen();
   jstring ret = env->NewStringUTF(fen.c_str());
   return ret;
 }
 
-enum State {
-  ALIVE,
-  WHITE_MATE,       // White mates (white wins)
-  BLACK_MATE,       // Black mates (black wins)
-  WHITE_STALEMATE,  // White is stalemated (white can't move)
-  BLACK_STALEMATE,  // Black is stalemated (black can't move)
-  DRAW_REPETITION,  // Draw by 3-fold repetition
-  DRAW_50           // Draw by 50-move rule
-};
+JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate__(JNIEnv *, jclass) {
+  return positionstate(*gpos);
+}
 
-JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate(JNIEnv *, jclass) {
-  Bitboard checkers = pos->checkers();
-  int noLegalMove = MoveList<LEGAL>(*pos).size() == 0;
+//------------------------------------------------------------------------------
 
-  if (noLegalMove) {
-    if (checkers) {
-      return (pos->side_to_move() == BLACK)? WHITE_MATE : BLACK_MATE;
-    } else {
-      return (pos->side_to_move() == BLACK)? BLACK_STALEMATE : WHITE_STALEMATE;
-    }
-  }
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal__ZLjava_lang_String_2Ljava_lang_String_2(
+  JNIEnv *env, jclass, jboolean chess960, jstring position, jstring move
+) {
+  Position pos(gStartFEN, chess960, Threads.main());
+  Search::StateStackPtr setupStates = Search::StateStackPtr(new std::stack<StateInfo>);
+  return
+    read_position(env, chess960, position, pos, setupStates) &&
+    islegal(pos, env, move);
+}
 
-  // Don't use pos->is_draw_rule50 to avoid checking noLegalMove again,
-  // see the implementation of is_draw_rule50
-  if (pos->rule50_count() > 99 && !checkers) return DRAW_50;
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen__ZLjava_lang_String_2(
+  JNIEnv *env, jclass, jboolean chess960, jstring position
+) {
+  Position pos(gStartFEN, chess960, Threads.main());
+  Search::StateStackPtr setupStates = Search::StateStackPtr(new std::stack<StateInfo>);
+  read_position(env, chess960, position, pos, setupStates);
 
-  if (pos->is_draw_repetition()) return DRAW_REPETITION;
+  // When read_position above returns false, the result is somewhere in the middle
+  string fen = pos.fen();
+  jstring ret = env->NewStringUTF(fen.c_str());
+  return ret;
+}
 
-  return ALIVE;
+JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate__ZLjava_lang_String_2(
+  JNIEnv *env, jclass, jboolean chess960, jstring position
+) {
+  Position pos(gStartFEN, chess960, Threads.main());
+  Search::StateStackPtr setupStates = Search::StateStackPtr(new std::stack<StateInfo>);
+  read_position(env, chess960, position, pos, setupStates);
+
+  // When read_position above returns false, the result is somewhere in the middle
+  return positionstate(pos);
 }
