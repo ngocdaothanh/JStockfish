@@ -25,7 +25,7 @@ if (JNI_FOUND)
     message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
 endif()
 
-# Generate jstockfish_Uci.h
+# Generate JNI .h files
 execute_process(
     COMMAND ${Java_JAVAH_EXECUTABLE} -verbose -jni
         -cp ${CMAKE_CURRENT_LIST_DIR}/src/main/java

@@ -13,6 +13,7 @@
 #include "syzygy/tbprobe.h"
 
 #include "jstockfish_Uci.h"
+#include "jstockfish_Position.h"
 
 using namespace std;
 
@@ -312,25 +313,25 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_perft(JNIEnv *, jclass, jint depth) {
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal__Ljava_lang_String_2(
+JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal(
   JNIEnv *env, jclass, jstring move
 ) {
   return islegal(*gpos, env, move);
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen__(JNIEnv *env, jclass) {
+JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen(JNIEnv *env, jclass) {
   string fen = gpos->fen();
   jstring ret = env->NewStringUTF(fen.c_str());
   return ret;
 }
 
-JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate__(JNIEnv *, jclass) {
+JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate(JNIEnv *, jclass) {
   return positionstate(*gpos);
 }
 
 //------------------------------------------------------------------------------
 
-JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal__ZLjava_lang_String_2Ljava_lang_String_2(
+JNIEXPORT jboolean JNICALL Java_jstockfish_Position_islegal(
   JNIEnv *env, jclass, jboolean chess960, jstring position, jstring move
 ) {
   Position pos(gStartFEN, chess960, Threads.main());
@@ -340,7 +341,7 @@ JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_islegal__ZLjava_lang_String_2Ljav
     islegal(pos, env, move);
 }
 
-JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen__ZLjava_lang_String_2(
+JNIEXPORT jstring JNICALL Java_jstockfish_Position_fen(
   JNIEnv *env, jclass, jboolean chess960, jstring position
 ) {
   Position pos(gStartFEN, chess960, Threads.main());
@@ -353,7 +354,7 @@ JNIEXPORT jstring JNICALL Java_jstockfish_Uci_fen__ZLjava_lang_String_2(
   return ret;
 }
 
-JNIEXPORT jint JNICALL Java_jstockfish_Uci_positionstate__ZLjava_lang_String_2(
+JNIEXPORT jint JNICALL Java_jstockfish_Position_positionstate(
   JNIEnv *env, jclass, jboolean chess960, jstring position
 ) {
   Position pos(gStartFEN, chess960, Threads.main());

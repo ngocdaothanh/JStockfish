@@ -5,6 +5,10 @@ package jstockfish;
  * can be called any time.
  */
 public class Position {
+    static {
+        System.loadLibrary("jstockfish");
+    }
+
     public static native boolean islegal(boolean chess960, String position, String move);
 
     public static native String fen(boolean chess960, String position);

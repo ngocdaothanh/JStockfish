@@ -24,8 +24,6 @@ sbt console -Djava.library.path=build
 Standard UCI commands:
 
 ```
-System.loadLibrary("jstockfish");
-
 import jstockfish.Uci
 
 Uci.uci
@@ -66,7 +64,8 @@ can be called any time:
 ```
 import jstockfish.Position
 
-Position.islegal(chess960 = false, "startpos moves d2d4", "g8f6")
-Position.fen(chess960 = false, "startpos moves d2d4")
-Position.state(chess960 = false, "startpos moves d2d4")
+val chess960 = false
+Position.islegal(chess960, "startpos moves d2d4", "g8f6")
+Position.fen(chess960, "startpos moves d2d4")
+Position.state(chess960, "startpos moves d2d4")
 ```

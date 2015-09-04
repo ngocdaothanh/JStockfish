@@ -16,8 +16,11 @@ package jstockfish;
  * handle synchronization.
  * </p>
  */
-public class Uci
-{
+public class Uci {
+    static {
+        System.loadLibrary("jstockfish");
+    }
+
     private static OutputListener listener = null;
 
     /** Only one listener is supported. */
