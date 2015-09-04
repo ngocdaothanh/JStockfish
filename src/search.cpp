@@ -320,7 +320,7 @@ void Search::think() {
   sync_cout << "bestmove " << UCI::move(RootMoves[0].pv[0], RootPos.is_chess960());
 
   if (RootMoves[0].pv.size() > 1 || RootMoves[0].extract_ponder_from_tt(RootPos))
-      std::cout << " ponder " << UCI::move(RootMoves[0].pv[1], RootPos.is_chess960());
+      sync_ss << " ponder " << UCI::move(RootMoves[0].pv[1], RootPos.is_chess960());
 
   sync_ss << sync_endl;
 }
