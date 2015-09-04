@@ -7,11 +7,25 @@
 
 ### Build
 
+You need [CMake](http://www.cmake.org/), JVM, and a C++ compiler to build:
+
 ```
 ./build.sh
 ```
 
 `build` directory will be created, containing the compiled library.
+
+If you see error like this:
+
+```
+Could NOT find JNI
+```
+
+Then try exporting `JAVA_HOME` and try building again:
+
+```
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+```
 
 ### Try with SBT
 
