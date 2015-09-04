@@ -15,7 +15,7 @@
 
 ### Try with SBT
 
-For details, please see [Javadoc](TODO).
+For details, please see [Javadoc](http://ngocdaothanh.github.io/JStockfish/).
 
 ```
 sbt console -Djava.library.path=build
