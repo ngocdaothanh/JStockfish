@@ -1,8 +1,9 @@
 ### Features
 
-TODO
-
-For convenience, the number of threads is set to the number of CPU cores.
+* UCI commands
+* Additional commands convenient for checking if a move is legal, getting FEN
+  and state from a position (check mate, stale mate, draw by 50-move rule or
+  3-fold repetition rule)
 
 ### Build
 
@@ -14,30 +15,58 @@ For convenience, the number of threads is set to the number of CPU cores.
 
 ### Try with SBT
 
+For details, please see [Javadoc](TODO).
+
 ```
 sbt console -Djava.library.path=build
+```
 
-import jstockfish.Uci._
+Standard UCI commands:
 
-// Standard UCI commands
-uci
-isready
-setoption("Threads", Runtime.getRuntime.availableProcessors.toString)
+```
+System.loadLibrary("jstockfish");
 
-ucinewgame
-position("startpos moves d2d4")
-go("infinite")
-stop
-ponderhit
+import jstockfish.Uci
 
-// Additional commands added by Stockfish
-flip
-bench("512 4 16")
-d
-eval
-perft(16)
+Uci.uci
+Uci.setoption("Threads", Runtime.getRuntime.availableProcessors.toString)
+Uci.setoption("UCI_Chess960", "true")
 
-// Additional commands added by JStockfish
-islegal("d2d4")
-fen
+Uci.ucinewgame()
+Uci.position("startpos moves d2d4")
+Uci.go("infinite")
+Uci.stop()
+Uci.ponderhit()
+```
+
+Additional commands added by Stockfish:
+
+```
+Uci.flip
+Uci.bench("512 4 16")
+Uci.d
+Uci.eval
+Uci.perft(16)
+```
+
+Additional commands added by JStockfish:
+
+```
+Uci.islegal("g8f6")
+Uci.fen
+Uci.state
+```
+
+Stockfish can't process multiple games at a time. User of class `Uci` should
+handle synchronization.
+
+Additional commands added by JStockfish, independent of the current game,
+can be called any time:
+
+```
+import jstockfish.Position
+
+Position.islegal(chess960 = false, "startpos moves d2d4", "g8f6")
+Position.fen(chess960 = false, "startpos moves d2d4")
+Position.state(chess960 = false, "startpos moves d2d4")
 ```

@@ -1,4 +1,4 @@
 build
 target
-src/main/cpp/jstockfish_Uci.h
+src/main/cpp/*.h
 .*

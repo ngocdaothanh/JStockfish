@@ -1,17 +1,23 @@
 package jstockfish;
 
 /**
+ * <p>
+ * This class contains commands that mimic UCI commands.
+ * </p>
+ *
+ * <p>
+ * {@code go}, {@code ponderhit}, {@code bench}, and {@code perft} are async. Use
+ * {@code setOutputListener} to capture the results. Others are sync, they return
+ * results immediately.
+ * </p>
+ *
+ * <p>
  * Stockfish can't process multiple games at a time. User of this class should
  * handle synchronization.
+ * </p>
  */
 public class Uci
 {
-    static {
-       System.loadLibrary("jstockfish");
-    }
-
-    //--------------------------------------------------------------------------
-
     private static OutputListener listener = null;
 
     /** Only one listener is supported. */
@@ -72,20 +78,6 @@ public class Uci
 
     public static State state() {
         int ordinal = positionstate();
-        return State.values()[ordinal];
-    }
-
-    // Additional commands added by JStockfish, independent of the current game,
-    // can be called any time
-
-    public static native boolean islegal(boolean chess960, String position, String move);
-
-    public static native String fen(boolean chess960, String position);
-
-    private static native int positionstate(boolean chess960, String position);
-
-    public static State state(boolean chess960, String position) {
-        int ordinal = positionstate(chess960, position);
         return State.values()[ordinal];
     }
 }

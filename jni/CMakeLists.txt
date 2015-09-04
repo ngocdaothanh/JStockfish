@@ -31,6 +31,11 @@ execute_process(
         -cp ${CMAKE_CURRENT_LIST_DIR}/src/main/java
         -d  ${CMAKE_CURRENT_LIST_DIR}/src/main/cpp
         jstockfish.Uci
+
+    COMMAND ${Java_JAVAH_EXECUTABLE} -verbose -jni
+        -cp ${CMAKE_CURRENT_LIST_DIR}/src/main/java
+        -d  ${CMAKE_CURRENT_LIST_DIR}/src/main/cpp
+        jstockfish.Position
 )
 
 include_directories(${JNI_INCLUDE_DIRS} "../src" "src/main/cpp")
