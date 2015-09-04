@@ -1,5 +1,5 @@
 package jstockfish;
 
 public interface OutputListener {
-    void onOutput(String outout);
+    void onOutput(String output);
 }

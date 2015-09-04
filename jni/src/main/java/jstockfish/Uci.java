@@ -21,7 +21,13 @@ public class Uci {
         System.loadLibrary("jstockfish");
     }
 
-    private static OutputListener listener = null;
+    // By default, just dump to console
+    private static OutputListener listener = new OutputListener() {
+        @Override
+        public void onOutput(String output) {
+            System.out.println(output);
+        }
+    };
 
     /** Only one listener is supported. */
     public static void setOutputListener(OutputListener listener) {
@@ -30,7 +36,6 @@ public class Uci {
 
     /** Called by native code. This method will in turn call the listener. */
     private static void onOutput(String output) {
-        System.out.println("output: " + output);
         if (listener != null) listener.onOutput(output);
     }
 
