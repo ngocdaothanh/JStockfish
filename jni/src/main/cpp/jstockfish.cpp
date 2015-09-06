@@ -139,37 +139,6 @@ bool islegal(Position& pos, JNIEnv *env, jstring move) {
   return pos.pseudo_legal(m);
 }
 
-enum State {
-  ALIVE,
-  WHITE_MATE,       // White mates (white wins)
-  BLACK_MATE,       // Black mates (black wins)
-  WHITE_STALEMATE,  // White is stalemated (white can't move)
-  BLACK_STALEMATE,  // Black is stalemated (black can't move)
-  DRAW_50,          // Draw by 50-move rule
-  DRAW_REPETITION   // Draw by 3-fold repetition
-};
-
-int positionstate(Position& pos) {
-  Bitboard checkers = pos.checkers();
-  int noLegalMove = MoveList<LEGAL>(pos).size() == 0;
-
-  if (noLegalMove) {
-    if (checkers) {
-      return (pos.side_to_move() == BLACK)? WHITE_MATE : BLACK_MATE;
-    } else {
-      return (pos.side_to_move() == BLACK)? BLACK_STALEMATE : WHITE_STALEMATE;
-    }
-  }
-
-  // Don't use Posistion::is_draw_rule50 to avoid checking noLegalMove again,
-  // see the implementation of is_draw_rule50
-  if (pos.rule50_count() > 99 && !checkers) return DRAW_50;
-
-  if (pos.is_draw_repetition()) return DRAW_REPETITION;
-
-  return ALIVE;
-}
-
 //------------------------------------------------------------------------------
 
 jint JNI_OnLoad(JavaVM *vm, void*) {

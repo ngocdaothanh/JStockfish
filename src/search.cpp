@@ -28,6 +28,7 @@
 #include "misc.h"
 #include "movegen.h"
 #include "movepick.h"
+#include "positionstate.h"
 #include "search.h"
 #include "timeman.h"
 #include "thread.h"
@@ -317,11 +318,31 @@ void Search::think() {
       RootPos.this_thread()->wait_for(Signals.stop);
   }
 
-  sync_cout << "bestmove " << UCI::move(RootMoves[0].pv[0], RootPos.is_chess960());
+  Move bestMove = RootMoves[0].pv[0];
 
-  if (RootMoves[0].pv.size() > 1 || RootMoves[0].extract_ponder_from_tt(RootPos))
-      sync_ss << " ponder " << UCI::move(RootMoves[0].pv[1], RootPos.is_chess960());
+  bool moveBestMove = Options["Info State"] || Options["Info FEN"];
+  if (moveBestMove) {
+    // SetupStates can be empty if position command hasn't been received before
+    StateStackPtr *s = SetupStates.get() ? &SetupStates : new StateStackPtr(new std::stack<StateInfo>);
 
+    (*s)->push(StateInfo());
+    RootPos.do_move(bestMove, (*s)->top(), RootPos.gives_check(bestMove, CheckInfo(RootPos)));
+
+    if (Options["Info State"])
+        sync_cout << "info state " << positionstate(RootPos) << sync_endl;
+
+    if (Options["Info FEN"])
+        sync_cout << "info fen " << RootPos.fen() << sync_endl;
+
+    RootPos.undo_move(bestMove);
+    if (!SetupStates.get()) delete s;
+  }
+
+  sync_cout << "bestmove " << UCI::move(bestMove, RootPos.is_chess960());
+  if (RootMoves[0].pv.size() > 1 || RootMoves[0].extract_ponder_from_tt(RootPos)) {
+    Move ponderMove = RootMoves[0].pv[1];
+    sync_ss << " ponder " << UCI::move(ponderMove, RootPos.is_chess960());
+  }
   sync_ss << sync_endl;
 }
 

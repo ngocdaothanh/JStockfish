@@ -56,6 +56,7 @@ private:
 
 enum SyncCout { IO_LOCK, IO_UNLOCK };
 
+// Modified by JStockfish
 extern std::stringstream sync_ss;
 #define sync_cout sync_ss << IO_LOCK
 #define sync_endl IO_UNLOCK
