@@ -5,6 +5,7 @@
 #include "evaluate.h"
 #include "movegen.h"
 #include "position.h"
+#include "positionstate.h"
 #include "search.h"
 #include "thread.h"
 #include "timeman.h"
