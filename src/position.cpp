@@ -1065,7 +1065,9 @@ Value Position::see(Move m) const {
 /// or by repetition. It does not detect stalemates.
 
 bool Position::is_draw() const {
-  return is_draw_rule50() || is_draw_repetition();
+  return
+    is_draw_rule50() ||
+    is_draw_repetition(2);  // Draw at first repetition
 }
 
 
@@ -1074,14 +1076,15 @@ bool Position::is_draw_rule50() const {
 }
 
 
-bool Position::is_draw_repetition() const {
+bool Position::is_draw_repetition(int fold) const {
+  int count = 1;
+
   StateInfo* stp = st;
   for (int i = 2, e = std::min(st->rule50, st->pliesFromNull); i <= e; i += 2)
   {
       stp = stp->previous->previous;
-
-      if (stp->key == st->key)
-          return true; // Draw at first repetition
+      if (stp->key == st->key) count++;
+      if (count >= fold) return true;
   }
 
   return false;

@@ -170,7 +170,7 @@ public:
   void set_nodes_searched(uint64_t n);
   bool is_draw() const;
   bool is_draw_rule50() const;
-  bool is_draw_repetition() const;
+  bool is_draw_repetition(int fold) const;
   int rule50_count() const;
   Score psq_score() const;
   Value non_pawn_material(Color c) const;

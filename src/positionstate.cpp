@@ -48,7 +48,7 @@ int positionstate(Position& pos) {
   // see the implementation of is_draw_rule50
   if (pos.rule50_count() > 99 && !checkers) return CAN_DRAW_50;
 
-  if (pos.is_draw_repetition()) return CAN_DRAW_REP;
+  if (pos.is_draw_repetition(3)) return CAN_DRAW_REP;
 
   return ALIVE;
 }
