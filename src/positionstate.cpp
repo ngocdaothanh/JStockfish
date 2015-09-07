@@ -3,7 +3,7 @@
 #include "movegen.h"
 
 // https://code.google.com/p/cuckoochess/source/browse/trunk/CuckooChessEngine/src/chess/Game.java#527
-bool is_insufficient_material(Position& pos) {
+bool is_draw_insufficient_material(Position& pos) {
   if (pos.pieces(QUEEN) != 0) return false;
   if (pos.pieces(ROOK)  != 0) return false;
   if (pos.pieces(PAWN)  != 0) return false;
@@ -42,7 +42,7 @@ int positionstate(Position& pos) {
     }
   }
 
-  if (is_insufficient_material(pos)) return DRAW_NO_MATE;
+  if (is_draw_insufficient_material(pos)) return DRAW_NO_MATE;
 
   // Don't use Posistion::is_draw_rule50 to avoid checking noLegalMove again,
   // see the implementation of is_draw_rule50

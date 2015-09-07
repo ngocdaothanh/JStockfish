@@ -73,12 +73,18 @@ State enum:
 
 ```
 ALIVE,
+
 WHITE_MATE,       // White mates (white wins)
 BLACK_MATE,       // Black mates (black wins)
+
+// Automatic draw
 WHITE_STALEMATE,  // White is stalemated (white can't move)
 BLACK_STALEMATE,  // Black is stalemated (black can't move)
-CAN_DRAW_REP,     // Can draw by 3-fold repetition rule
-CAN_DRAW_50       // Can draw by 50-move rule
+DRAW_NO_MATE,     // Draw by insufficient material
+
+// Can draw, but players must claim
+CAN_DRAW_50,      // Can draw by 50-move rule
+CAN_DRAW_REP;     // Can draw by 3-fold repetition rule
 ```
 
 The order is similar to that of
