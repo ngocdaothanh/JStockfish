@@ -1077,14 +1077,14 @@ bool Position::is_draw_rule50() const {
 
 
 bool Position::is_draw_repetition(int fold) const {
-  int count = 1;
+  int foldCount = 1;
 
   StateInfo* stp = st;
   for (int i = 2, e = std::min(st->rule50, st->pliesFromNull); i <= e; i += 2)
   {
       stp = stp->previous->previous;
-      if (stp->key == st->key) count++;
-      if (count >= fold) return true;
+      if (stp->key == st->key) foldCount++;
+      if (foldCount >= fold) return true;
   }
 
   return false;
