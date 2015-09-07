@@ -1,5 +1,34 @@
 #include "positionstate.h"
+#include "bitcount.h"
 #include "movegen.h"
+
+// https://code.google.com/p/cuckoochess/source/browse/trunk/CuckooChessEngine/src/chess/Game.java#527
+bool is_insufficient_material(Position& pos) {
+  if (pos.pieces(QUEEN) != 0) return false;
+  if (pos.pieces(ROOK)  != 0) return false;
+  if (pos.pieces(PAWN)  != 0) return false;
+
+  Bitboard wb = pos.pieces(WHITE, BISHOP);
+  Bitboard bb = pos.pieces(BLACK, BISHOP);
+
+  int nwb = popcount<CNT_64>(wb);
+  int nbb = popcount<CNT_64>(bb);
+  int nwn = popcount<CNT_64>(pos.pieces(WHITE, KNIGHT));
+  int nbn = popcount<CNT_64>(pos.pieces(BLACK, KNIGHT));
+
+  // King + bishop/knight vs king is draw
+  if (nwb + nwn + nbb + nbn <= 1) return true;
+
+  if (nwn + nbn == 0) {
+      // Only bishops. If they are all on the same color, the position is a draw.
+      Bitboard bMask = wb | bb;
+      if (((bMask & DarkSquares) == 0) ||
+          ((bMask & LightSquares) == 0))
+          return true;
+  }
+
+  return false;
+}
 
 int positionstate(Position& pos) {
   Bitboard checkers = pos.checkers();
@@ -12,6 +41,8 @@ int positionstate(Position& pos) {
       return (pos.side_to_move() == BLACK)? BLACK_STALEMATE : WHITE_STALEMATE;
     }
   }
+
+  if (is_insufficient_material(pos)) return DRAW_NO_MATE;
 
   // Don't use Posistion::is_draw_rule50 to avoid checking noLegalMove again,
   // see the implementation of is_draw_rule50

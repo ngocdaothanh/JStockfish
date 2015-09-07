@@ -10,8 +10,9 @@ enum State {
   BLACK_MATE,       // Black mates (black wins)
   WHITE_STALEMATE,  // White is stalemated (white can't move)
   BLACK_STALEMATE,  // Black is stalemated (black can't move)
-  CAN_DRAW_REP,     // Can draw by 3-fold repetition rule
-  CAN_DRAW_50       // Can draw by 50-move rule
+  DRAW_NO_MATE,     // Draw by insufficient material
+  CAN_DRAW_50,      // Can draw by 50-move rule
+  CAN_DRAW_REP      // Can draw by 3-fold repetition rule
 };
 
 int positionstate(Position& pos);
