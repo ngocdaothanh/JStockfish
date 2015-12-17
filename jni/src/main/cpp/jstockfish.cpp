@@ -190,7 +190,7 @@ JNIEXPORT jboolean JNICALL Java_jstockfish_Uci_setoption(JNIEnv *env, jclass, js
 }
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_ucinewgame(JNIEnv *, jclass) {
-  Search::reset();
+  Search::clear();
   Time.availableNodes = 0;
 }
 
@@ -234,13 +234,13 @@ JNIEXPORT void JNICALL Java_jstockfish_Uci_go(JNIEnv *env, jclass, jstring optio
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_stop(JNIEnv *, jclass) {
   Search::Signals.stop = true;
-  Threads.main()->notify_one();  // Could be sleeping
+  Threads.main()->start_searching(true); // Could be sleeping
 }
 
 JNIEXPORT void JNICALL Java_jstockfish_Uci_ponderhit(JNIEnv *, jclass) {
   if (Search::Signals.stopOnPonderhit) {
     Search::Signals.stop = true;
-    Threads.main()->notify_one();  // Could be sleeping
+    Threads.main()->start_searching(true); // Could be sleeping
   } else {
     Search::Limits.ponder = false; // Switch to normal search
   }
