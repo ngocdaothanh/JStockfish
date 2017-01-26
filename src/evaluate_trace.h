@@ -18,24 +18,25 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EVALUATE_H_INCLUDED
-#define EVALUATE_H_INCLUDED
-
-#include <string>
+#ifndef EVALUATE_TRACE_H_INCLUDED
+#define EVALUATE_TRACE_H_INCLUDED
 
 #include "types.h"
 
-class Position;
+namespace Trace {
+  enum Term { // The first 8 entries are for PieceType
+    MATERIAL = 8, IMBALANCE, MOBILITY, THREAT, PASSED, SPACE, TOTAL, TERM_NB
+  };
 
-namespace Eval {
-  const Value Tempo = Value(20); // Must be visible to search
+  extern double scores[TERM_NB][COLOR_NB][PHASE_NB];
 
-  std::string trace(const Position& pos);
+  double to_cp(Value v);
 
-  template<bool DoTrace = false>
-  Value evaluate(const Position& pos);
+  void add(int idx, Color c, Score s);
 
-  void scores(const Position& pos);
+  void add(int idx, Score w, Score b = SCORE_ZERO);
+
+  std::ostream& operator<<(std::ostream& os, Term t);
 }
 
-#endif // #ifndef EVALUATE_H_INCLUDED
+#endif // #ifndef EVALUATE_TRACE_H_INCLUDED
