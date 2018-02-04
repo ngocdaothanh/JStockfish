@@ -36,6 +36,8 @@ extern Score Contempt;
 std::string trace(const Position& pos);
 
 Value evaluate(const Position& pos);
+
+void set_scores(const Position& pos);
 }
 
 #endif // #ifndef EVALUATE_H_INCLUDED

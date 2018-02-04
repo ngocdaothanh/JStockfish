@@ -26,6 +26,7 @@
 
 #include "bitboard.h"
 #include "evaluate.h"
+#include "evaluate_trace.h"
 #include "material.h"
 #include "pawns.h"
 
@@ -40,43 +41,7 @@ namespace {
     QueenSide, QueenSide, QueenSide, CenterFiles, CenterFiles, KingSide, KingSide, KingSide
   };
 
-  namespace Trace {
 
-    enum Tracing {NO_TRACE, TRACE};
-
-    enum Term { // The first 8 entries are for PieceType
-      MATERIAL = 8, IMBALANCE, MOBILITY, THREAT, PASSED, SPACE, INITIATIVE, TOTAL, TERM_NB
-    };
-
-    double scores[TERM_NB][COLOR_NB][PHASE_NB];
-
-    double to_cp(Value v) { return double(v) / PawnValueEg; }
-
-    void add(int idx, Color c, Score s) {
-      scores[idx][c][MG] = to_cp(mg_value(s));
-      scores[idx][c][EG] = to_cp(eg_value(s));
-    }
-
-    void add(int idx, Score w, Score b = SCORE_ZERO) {
-      add(idx, WHITE, w); add(idx, BLACK, b);
-    }
-
-    std::ostream& operator<<(std::ostream& os, Term t) {
-
-      if (t == MATERIAL || t == IMBALANCE || t == Term(PAWN) || t == INITIATIVE || t == TOTAL)
-          os << "  ---   --- |   ---   --- | ";
-      else
-          os << std::setw(5) << scores[t][WHITE][MG] << " "
-             << std::setw(5) << scores[t][WHITE][EG] << " | "
-             << std::setw(5) << scores[t][BLACK][MG] << " "
-             << std::setw(5) << scores[t][BLACK][EG] << " | ";
-
-      os << std::setw(5) << scores[t][WHITE][MG] - scores[t][BLACK][MG] << " "
-         << std::setw(5) << scores[t][WHITE][EG] - scores[t][BLACK][EG] << " \n";
-
-      return os;
-    }
-  }
 
   using namespace Trace;
 
@@ -949,4 +914,16 @@ std::string Eval::trace(const Position& pos) {
   ss << "\nTotal Evaluation: " << to_cp(v) << " (white side)\n";
 
   return ss.str();
+}
+
+/// Similar to trace() but it doesn't return anything and sets
+/// Trace::scores[TOTAL][WHITE][ALL_PIECES] to total cp from white's point of view.
+
+void Eval::set_scores(const Position& pos) {
+  std::memset(scores, 0, sizeof(scores));
+
+  Value v = Evaluation<TRACE>(pos).value() + Eval::Tempo;
+  v = pos.side_to_move() == WHITE ? v : -v;
+
+  scores[TOTAL][WHITE][ALL_PIECES] = to_cp(v);
 }
