@@ -4,7 +4,7 @@ Java JNI binding for Stockfish.
 
 ## Features
 
-* [UCI commands](https://github.com/ngocdaothanh/JStockfish/blob/master/engine-interface.txt)
+* [UCI commands](https://github.com/ngocdaothanh/JStockfish/blob/jni/engine-interface.txt)
 * Additional commands convenient for checking if a move is legal, getting FEN
   and state from a position (check mate, stale mate, draw by 50-move rule or
   3-fold repetition rule)
