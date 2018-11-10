@@ -39,6 +39,31 @@ For details, please see [Javadoc](http://ngocdaothanh.github.io/JStockfish/).
 sbt console -Djava.library.path=build
 ```
 
+If there's error
+"java.lang.UnsatisfiedLinkError: no jstockfish in java.library.path",
+try using [this snippet](http://www.scala-lang.org/old/node/7542):
+
+```scala
+def unsafeAddDir(dir: String) = try {
+  val field = classOf[ClassLoader].getDeclaredField("usr_paths")
+  field.setAccessible(true)
+  val paths = field.get(null).asInstanceOf[Array[String]]
+  if (!(paths contains dir)) {
+    field.set(null, paths :+ dir)
+    System.setProperty(
+      "java.library.path",
+      System.getProperty("java.library.path") + java.io.File.pathSeparator + dir)
+  }
+} catch {
+  case _: IllegalAccessException =>
+    println("Insufficient permissions; can't modify private variables.")
+  case _: NoSuchFieldException =>
+    println("JVM implementation incompatible with path hack")
+}
+
+unsafeAddDir("./build")
+```
+
 ### Standard UCI commands
 
 ```scala
