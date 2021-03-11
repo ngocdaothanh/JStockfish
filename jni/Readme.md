@@ -21,14 +21,27 @@ You need [CMake](http://www.cmake.org/), JVM, and a C++ compiler to build:
 
 If you see error like this:
 
-```sh
+```
 Could NOT find JNI
 ```
 
 Then try exporting `JAVA_HOME` and try building again:
 
 ```sh
-export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+```
+
+If you see error like this even after setting the above:
+
+```
+Could NOT find JNI (missing: JAVA_AWT_INCLUDE_PATH)
+```
+
+Probably you're using headless JVM.
+Create a fake `jawt.h` file to make the search for AWT pass:
+
+```sh
+sudo touch /usr/lib/jvm/java-11-openjdk-amd64/include/jawt.h
 ```
 
 ## Try with SBT
