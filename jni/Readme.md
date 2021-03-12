@@ -11,7 +11,13 @@ Java JNI binding for Stockfish.
 
 ## Build
 
-You need [CMake](http://www.cmake.org/), JVM, and a C++ compiler to build:
+You need [CMake](http://www.cmake.org/), **JDK 8**, and a C++ compiler to build.
+
+After building, you can use the built files with Java 6+.
+
+You **cannot use JDK 10+** to build, because `javah` (for generating JNI header files)
+command is removed in this version, and replaced with `javac -h`.
+But CMake (as of 3.20) doesn't know about it.
 
 ```sh
 ./build.sh
@@ -28,20 +34,7 @@ Could NOT find JNI
 Then try exporting `JAVA_HOME` and try building again:
 
 ```sh
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-```
-
-If you see error like this even after setting the above:
-
-```
-Could NOT find JNI (missing: JAVA_AWT_INCLUDE_PATH)
-```
-
-Probably you're using headless JVM.
-Create a fake `jawt.h` file to make the search for AWT pass:
-
-```sh
-sudo touch /usr/lib/jvm/java-11-openjdk-amd64/include/jawt.h
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ```
 
 ## Try with SBT
