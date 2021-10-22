@@ -37,6 +37,19 @@ Then try exporting `JAVA_HOME` and try building again:
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ```
 
+If you see error like this:
+
+```
+Could NOT find JNI (missing: JAVA_AWT_INCLUDE_PATH)
+```
+
+Then try adding these to `CMakeLists.txt`:
+
+```
+set(JAVA_AWT_LIBRARY .)
+set(JAVA_AWT_INCLUDE_PATH .)
+```
+
 ## Try with SBT
 
 For details, please see [Javadoc](http://ngocdaothanh.github.io/JStockfish/).
