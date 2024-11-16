@@ -1,0 +1,197 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "cmake@latest": {
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#cmake",
+      "source": "devbox-search",
+      "version": "3.30.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wjja52fahksjwnikmy09n5y2pa7dymma-cmake-3.30.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wjja52fahksjwnikmy09n5y2pa7dymma-cmake-3.30.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/i8hfbcxgsp8aj8vhsscxyjsglilwd5i3-cmake-3.30.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/8s1jn7aj6k5r0dzga4na6mf2hmbhd62a-cmake-3.30.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/i8hfbcxgsp8aj8vhsscxyjsglilwd5i3-cmake-3.30.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y0gmpiv78vyxb0bfqm8y58hqazjkpm7l-cmake-3.30.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/y0gmpiv78vyxb0bfqm8y58hqazjkpm7l-cmake-3.30.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/irwcgpm8csj7br49jih6kdpqkaqya3vf-cmake-3.30.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/wqa3jwxi67szp5q7s89x58a31791qh7s-cmake-3.30.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/irwcgpm8csj7br49jih6kdpqkaqya3vf-cmake-3.30.4"
+        }
+      }
+    },
+    "gcc@latest": {
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#gcc14",
+      "source": "devbox-search",
+      "version": "14.2.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/lw578cwp703qc8pmkzs49nzlnvy8vgq3-gcc-wrapper-14.2.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/mb6flpxah9w6jmkvqv3c7xyhrz92dikw-gcc-wrapper-14.2.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/0y38x4xqlinfmrjn35mjin9pl6q8l4x2-gcc-wrapper-14.2.0-info"
+            }
+          ],
+          "store_path": "/nix/store/lw578cwp703qc8pmkzs49nzlnvy8vgq3-gcc-wrapper-14.2.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/j1q85wkci43ilrg2xkvhicpbymrg7fwf-gcc-wrapper-14.2.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/cribwsmnxbsmaid42nxdmqnhnn0clwzn-gcc-wrapper-14.2.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/x7wvsix15c5xq93rd4l4i4434bgpk2wy-gcc-wrapper-14.2.0-info"
+            }
+          ],
+          "store_path": "/nix/store/j1q85wkci43ilrg2xkvhicpbymrg7fwf-gcc-wrapper-14.2.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/x5rjmaq2b17r7dm1jiqgjpy1yx4x06fl-gcc-wrapper-14.2.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/s3fzwhphgs3vq5nwz7y404ip8r2hi6l0-gcc-wrapper-14.2.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/m18rmz8rn6vj6q9a8jyp4b2njh6f65qp-gcc-wrapper-14.2.0-info"
+            }
+          ],
+          "store_path": "/nix/store/x5rjmaq2b17r7dm1jiqgjpy1yx4x06fl-gcc-wrapper-14.2.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8688jxxpd2zh7blj1j4wjrinff7xwzih-gcc-wrapper-14.2.0",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/r190k6w31qd5882ighs6m1mzgp6s0i70-gcc-wrapper-14.2.0-man",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/clpm2i7xzx64dwsq0yr7lq93a3rj29ky-gcc-wrapper-14.2.0-info"
+            }
+          ],
+          "store_path": "/nix/store/8688jxxpd2zh7blj1j4wjrinff7xwzih-gcc-wrapper-14.2.0"
+        }
+      }
+    },
+    "jdk@8": {
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#jdk8",
+      "source": "devbox-search",
+      "version": "8u422-ga",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "path": "/nix/store/whsnjvsmz8vsvia6pyhl0z72bzdxssrl-zulu-ca-jdk-8.0.422",
+              "default": true
+            }
+          ]
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/58qmikrgs9wvza6q9cpd8p6iiyhh7lax-openjdk-8u422-ga",
+              "default": true
+            },
+            {
+              "name": "jre",
+              "path": "/nix/store/n0i3nlr0g0bi8l8qxys0gpl1s4p0z8ps-openjdk-8u422-ga-jre"
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/xczpypll9d1hrvv0ii27gk09vdzkwkyd-openjdk-8u422-ga-debug"
+            }
+          ],
+          "store_path": "/nix/store/58qmikrgs9wvza6q9cpd8p6iiyhh7lax-openjdk-8u422-ga"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/c77a4qrwf8aph8rr6hggx0vfh9g93b5s-openjdk-8u422-ga",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/wlcq8njgwh311722c65sm5bl36rzhfdb-openjdk-8u422-ga-debug"
+            },
+            {
+              "name": "jre",
+              "path": "/nix/store/kj6rrd4vcsgi158082x2iv0b0bnic9y7-openjdk-8u422-ga-jre"
+            }
+          ],
+          "store_path": "/nix/store/c77a4qrwf8aph8rr6hggx0vfh9g93b5s-openjdk-8u422-ga"
+        }
+      }
+    }
+  }
+}
